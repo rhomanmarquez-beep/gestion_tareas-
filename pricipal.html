@@ -1,11 +1,63 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="es">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>gestion de tareas</title>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestor de Tareas Sencillo</title>
+  <link rel="stylesheet" href="estilo.css">
 </head>
 <body>
-    
+
+  <main class="contenedor">
+    <h1>📋 Mis Tareas</h1>
+
+    <div class="acciones-principales">
+      <button id="btnNuevaTarea" class="btn primario">+ Nueva Tarea</button>
+      <button id="btnAbrirImportar" class="btn secundario">☁️ Importar de la API</button>
+      <button id="btnMarcarTodas" class="btn secundario">✓ Marcar todas completas</button>
+      <button id="btnVaciar" class="btn peligro">🗑️ Vaciar todo</button>
+    </div>
+
+    <div class="filtros">
+      <input type="text" id="buscador" placeholder="🔍 Buscar tarea...">
+      <select id="filtroEstado">
+        <option value="todas">Todas</option>
+        <option value="pendientes">Pendientes</option>
+        <option value="completadas">Completadas</option>
+      </select>
+    </div>
+
+    <ul id="listaTareas" class="lista"></ul>
+    <p id="mensajeVacio" class="vacio">No hay tareas creadas todavía.</p>
+  </main>
+
+  <div id="modalTarea" class="modal oculto">
+    <div class="modal-contenido">
+      <h2 id="tituloModal">Nueva Tarea</h2>
+      <form id="formTarea">
+        <input type="hidden" id="tareaId">
+        <label>Título / Descripción:</label>
+        <input type="text" id="inputTitulo" required placeholder="Ej. Estudiar JavaScript">
+        
+        <div class="modal-acciones">
+          <button type="button" id="btnCerrarModal" class="btn secundario">Cancelar</button>
+          <button type="submit" class="btn primario">Guardar</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <div id="modalImportar" class="modal oculto">
+    <div class="modal-contenido grande">
+      <h2>Importar Tareas de Internet (API)</h2>
+      <div id="listaApi" class="lista-api">Cargando...</div>
+      <div class="modal-acciones">
+        <button type="button" id="btnCerrarImportar" class="btn secundario">Cerrar</button>
+        <button type="button" id="btnGuardarImportadas" class="btn primario">Guardar Seleccionadas</button>
+      </div>
+    </div>
+  </div>
+
+  <script src="trabajo.js"></script>
 </body>
 </html>
