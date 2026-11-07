@@ -11,3 +11,4 @@ const modalImportar = document.getElementById('modalImportar');
 const listaApi = document.getElementById('listaApi');
 const buscador = document.getElementById('buscador');
 const filtroEstado = document.getElementById('filtroEstado');
+
