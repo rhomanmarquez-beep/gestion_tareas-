@@ -107,3 +107,51 @@ function cerrarModal() {
 }
 
 document.getElementById('btnCerrarModal').addEventListener('click', cerrarModal);
+
+// Actualizamos la función de renderizado para soportar filtros y búsqueda
+function renderizarTareas() {
+  listaTareas.innerHTML = '';
+  
+  const textoBuscador = buscador.value.toLowerCase();
+  const estadoFiltro = filtroEstado.value;
+
+  // Filtrar tareas por texto y estado
+  const tareasFiltradas = tareas.filter(t => {
+    const coincideTexto = t.titulo.toLowerCase().includes(textoBuscador);
+    const coincideEstado = 
+      estadoFiltro === 'todas' ? true :
+      estadoFiltro === 'completadas' ? t.completado :
+      !t.completado;
+    return coincideTexto && coincideEstado;
+  });
+
+  if (tareasFiltradas.length === 0) {
+    mensajeVacio.style.display = 'block';
+  } else {
+    mensajeVacio.style.display = 'none';
+  }
+
+  tareasFiltradas.forEach(tarea => {
+    const li = document.createElement('li');
+    li.className = `tarea-item ${tarea.completado ? 'completada' : ''}`;
+    
+    li.innerHTML = `
+      <div>
+        <input type="checkbox" ${tarea.completado ? 'checked' : ''} onclick="cambiarEstado('${tarea.id}')">
+        <span>${tarea.titulo}</span>
+        ${tarea.esImportada ? '<span class="badge">Importada</span>' : ''}
+      </div>
+      <div>
+        ${!tarea.esImportada ? `<button class="btn secundario" onclick="prepararEdicion('${tarea.id}')">✏️</button>` : ''}
+        <button class="btn peligro" onclick="eliminarTarea('${tarea.id}')">🗑️</button>
+      </div>
+    `;
+    listaTareas.appendChild(li);
+  });
+
+  localStorage.setItem('MIS_TAREAS', JSON.stringify(tareas));
+}
+
+
+buscador.addEventListener('input', renderizarTareas);
+filtroEstado.addEventListener('change', renderizarTareas);
