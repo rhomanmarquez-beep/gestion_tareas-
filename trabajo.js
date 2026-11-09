@@ -58,3 +58,52 @@ function eliminarTarea(id) {
   tareas = tareas.filter(t => t.id !== id);
   renderizarTareas();
 }
+
+formTarea.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const id = tareaIdInput.value;
+  const titulo = inputTitulo.value.trim();
+
+  if (id) {
+    // Si tiene ID, estamos editando
+    const tarea = tareas.find(t => t.id === id);
+    if (tarea) tarea.titulo = titulo;
+  } else {
+    // Si no tiene ID, creamos una nueva
+    tareas.push({
+      id: 'task_' + Date.now(),
+      titulo: titulo,
+      fecha: new Date().toLocaleDateString(),
+      completado: false,
+      esImportada: false
+    });
+  }
+
+  cerrarModal();
+  renderizarTareas();
+});
+
+// Botón para abrir modal de nueva tarea
+document.getElementById('btnNuevaTarea').addEventListener('click', () => {
+  document.getElementById('tituloModal').innerText = 'Nueva Tarea';
+  tareaIdInput.value = '';
+  formTarea.reset();
+  modalTarea.classList.remove('oculto');
+});
+
+// Preparar modal para editar
+function prepararEdicion(id) {
+  const tarea = tareas.find(t => t.id === id);
+  if (!tarea || tarea.esImportada) return; 
+  
+  document.getElementById('tituloModal').innerText = 'Editar Tarea';
+  tareaIdInput.value = tarea.id;
+  inputTitulo.value = tarea.titulo;
+  modalTarea.classList.remove('oculto');
+}
+
+function cerrarModal() { 
+  modalTarea.classList.add('oculto'); 
+}
+
+document.getElementById('btnCerrarModal').addEventListener('click', cerrarModal);
