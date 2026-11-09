@@ -152,6 +152,49 @@ function renderizarTareas() {
   localStorage.setItem('MIS_TAREAS', JSON.stringify(tareas));
 }
 
-
 buscador.addEventListener('input', renderizarTareas);
 filtroEstado.addEventListener('change', renderizarTareas);
+
+//  IMPORTAR DESDE LA API
+document.getElementById('btnAbrirImportar').addEventListener('click', async () => {
+  modalImportar.classList.remove('oculto');
+  listaApi.innerHTML = 'Cargando tareas de Internet...';
+
+  try {
+    const respuesta = await fetch('https://jsonplaceholder.typicode.com/todos');
+    const datos = await respuesta.json();
+    
+    listaApi.innerHTML = '';
+    datos.forEach(item => {
+      const div = document.createElement('div');
+      div.innerHTML = `
+        <label>
+          <input type="checkbox" data-id="${item.id}" data-titulo="${item.title}">
+          ${item.title}
+        </label>
+      `;
+      listaApi.appendChild(div);
+    });
+  } catch (error) {
+    listaApi.innerHTML = 'Ocurrió un error al cargar la API.';
+  }
+});
+
+document.getElementById('btnGuardarImportadas').addEventListener('click', () => {
+  const checkboxes = listaApi.querySelectorAll('input[type="checkbox"]:checked');
+  checkboxes.forEach(chk => {
+    tareas.push({
+      id: 'task_imp_' + chk.dataset.id,
+      titulo: chk.dataset.titulo,
+      fecha: new Date().toLocaleDateString(),
+      completado: false,
+      esImportada: true 
+    });
+  });
+  modalImportar.classList.add('oculto');
+  renderizarTareas();
+});
+
+document.getElementById('btnCerrarImportar').addEventListener('click', () => {
+  modalImportar.classList.add('oculto');
+});
