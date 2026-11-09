@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Inicia sesión para continuar - Tareas</title>
+  <link rel="stylesheet" href="estilo.css">
+</head>
+<body class="centered-layout">
+
+  <div class="auth-card">
+    <div class="logo-container">
+      <span class="logo-text">Tareas</span>
+    </div>
+
+    <h1 class="auth-title">Inicia sesión para continuar</h1>
+
+    <form action="pricipal.html" method="GET">
+      <div class="form-control">
+        <label for="email">Correo <span class="required">*</span></label>
+        <div class="input-wrapper" id="emailWrapper">
+          <input 
+            type="email" 
+            id="email" 
+            name="email" 
+            placeholder="nombre@ejemplo.com"
+            required
+          >
+        </div>
+      </div>
+
+      <div class="form-control">
+        <label for="password">Contraseña <span class="required">*</span></label>
+        <div class="input-wrapper">
+          <input 
+            type="password" 
+            id="password" 
+            name="password" 
+            placeholder="Introducir contraseña" 
+            required
+          >
+        </div>
+      </div>
+
+      <div class="checkbox-control">
+        <label class="checkbox-label">
+          <input type="checkbox" id="remember" name="remember" checked>
+          Recordarme
+        </label>
+        <span class="info-icon" title="Información sobre recordarme">i</span>
+      </div>
+
+      <button type="submit" class="btn-submit" style="width: 100%;">Iniciar sesión</button>
+    </form>
+  </div>
+
+</body>
+</html>
