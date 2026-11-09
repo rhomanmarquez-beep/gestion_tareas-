@@ -198,3 +198,15 @@ document.getElementById('btnGuardarImportadas').addEventListener('click', () => 
 document.getElementById('btnCerrarImportar').addEventListener('click', () => {
   modalImportar.classList.add('oculto');
 });
+//  ACCIONES GLOBALES
+document.getElementById('btnMarcarTodas').addEventListener('click', () => {
+  tareas.forEach(t => t.completado = true);
+  renderizarTareas();
+});
+
+document.getElementById('btnVaciar').addEventListener('click', () => {
+  if (confirm('¿Estás seguro de vaciar toda la lista?')) {
+    tareas = [];
+    renderizarTareas();
+  }
+});
