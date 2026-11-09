@@ -212,80 +212,78 @@ document.getElementById('btnCerrarModal').addEventListener('click', cerrarModal)
 buscador.addEventListener('input', renderizarTareas);
 filtroEstado.addEventListener('change', renderizarTareas);
 
-// Actualizamos la función de renderizado para soportar filtros y búsqueda
-function renderizarTareas() {
-  listaTareas.innerHTML = '';
-  
-  const textoBuscador = buscador.value.toLowerCase();
-  const estadoFiltro = filtroEstado.value;
-
-  // Filtrar tareas por texto y estado
-  const tareasFiltradas = tareas.filter(t => {
-    const coincideTexto = t.titulo.toLowerCase().includes(textoBuscador);
-    const coincideEstado = 
-      estadoFiltro === 'todas' ? true :
-      estadoFiltro === 'completadas' ? t.completado :
-      !t.completado;
-    return coincideTexto && coincideEstado;
-  });
-
-  if (tareasFiltradas.length === 0) {
-    mensajeVacio.style.display = 'block';
-  } else {
-    mensajeVacio.style.display = 'none';
-  }
-
-  tareasFiltradas.forEach(tarea => {
-    const li = document.createElement('li');
-    li.className = `tarea-item ${tarea.completado ? 'completada' : ''}`;
-    
-    li.innerHTML = `
-      <div>
-        <input type="checkbox" ${tarea.completado ? 'checked' : ''} onclick="cambiarEstado('${tarea.id}')">
-        <span>${tarea.titulo}</span>
-        ${tarea.esImportada ? '<span class="badge">Importada</span>' : ''}
-      </div>
-      <div>
-        ${!tarea.esImportada ? `<button class="btn secundario" onclick="prepararEdicion('${tarea.id}')">✏️</button>` : ''}
-        <button class="btn peligro" onclick="eliminarTarea('${tarea.id}')">🗑️</button>
-      </div>
-    `;
-    listaTareas.appendChild(li);
-  });
-
-  localStorage.setItem('MIS_TAREAS', JSON.stringify(tareas));
-}
-
-buscador.addEventListener('input', renderizarTareas);
-filtroEstado.addEventListener('change', renderizarTareas);
-
-//  IMPORTAR DESDE LA API
+// 5. IMPORTAR TAREAS DESDE API
 document.getElementById('btnAbrirImportar').addEventListener('click', async () => {
   modalImportar.classList.remove('oculto');
-  listaApi.innerHTML = 'Cargando tareas de Internet...';
+  listaApi.innerHTML = '<p style="padding: 20px; text-align: center;">Cargando banco de tareas desde la API...</p>';
 
   try {
     const respuesta = await fetch('https://jsonplaceholder.typicode.com/todos');
-    const datos = await respuesta.json();
+    if (!respuesta.ok) throw new Error('Error al conectar con la API');
     
-    listaApi.innerHTML = '';
-    datos.forEach(item => {
-      const div = document.createElement('div');
-      div.innerHTML = `
-        <label>
-          <input type="checkbox" data-id="${item.id}" data-titulo="${item.title}">
-          ${item.title}
-        </label>
-      `;
-      listaApi.appendChild(div);
-    });
+    tareasApiGlobal = await respuesta.json();
+    mostrarTareasApiEnModal(tareasApiGlobal);
+
   } catch (error) {
-    listaApi.innerHTML = 'Ocurrió un error al cargar la API.';
+    listaApi.innerHTML = '<p style="color: red; padding: 20px; text-align: center;">Ocurrió un error al cargar la API. Verifica tu conexión.</p>';
   }
 });
 
+function mostrarTareasApiEnModal(datos) {
+  listaApi.innerHTML = '';
+  
+  
+  const contenedorScroll = document.createElement('div');
+  contenedorScroll.style.maxHeight = '300px';
+  contenedorScroll.style.overflowY = 'auto';
+  contenedorScroll.style.border = '1px solid #ddd';
+  contenedorScroll.style.padding = '10px';
+  contenedorScroll.style.borderRadius = '4px';
+
+  
+  const inputFiltroApi = document.createElement('input');
+  inputFiltroApi.type = 'text';
+  inputFiltroApi.placeholder = 'Buscar en la API...';
+  inputFiltroApi.style.width = '100%';
+  inputFiltroApi.style.marginBottom = '10px';
+  inputFiltroApi.style.padding = '8px';
+  inputFiltroApi.style.boxSizing = 'border-box';
+
+  const renderListaInterna = (items) => {
+    contenedorScroll.innerHTML = '';
+    items.forEach(item => {
+      const div = document.createElement('div');
+      div.style.padding = '6px 0';
+      div.style.borderBottom = '1px solid #eee';
+      div.innerHTML = `
+        <label style="cursor: pointer; display: flex; align-items: center; gap: 8px;">
+          <input type="checkbox" data-id="${item.id}" data-titulo="${item.title}">
+          <span>[ID: ${item.id}] ${item.title}</span>
+        </label>
+      `;
+      contenedorScroll.appendChild(div);
+    });
+  };
+
+  inputFiltroApi.addEventListener('input', (e) => {
+    const texto = e.target.value.toLowerCase();
+    const filtrados = tareasApiGlobal.filter(t => t.title.toLowerCase().includes(texto));
+    renderListaInterna(filtrados);
+  });
+
+  renderListaInterna(datos);
+
+  listaApi.appendChild(inputFiltroApi);
+  listaApi.appendChild(contenedorScroll);
+}
+
 document.getElementById('btnGuardarImportadas').addEventListener('click', () => {
   const checkboxes = listaApi.querySelectorAll('input[type="checkbox"]:checked');
+  if (checkboxes.length === 0) {
+    alert('Por favor selecciona al menos una tarea para importar.');
+    return;
+  }
+
   checkboxes.forEach(chk => {
     tareas.push({
       id: 'task_imp_' + chk.dataset.id,
@@ -295,6 +293,7 @@ document.getElementById('btnGuardarImportadas').addEventListener('click', () => 
       esImportada: true 
     });
   });
+  
   modalImportar.classList.add('oculto');
   renderizarTareas();
 });
@@ -302,7 +301,8 @@ document.getElementById('btnGuardarImportadas').addEventListener('click', () => 
 document.getElementById('btnCerrarImportar').addEventListener('click', () => {
   modalImportar.classList.add('oculto');
 });
-//  ACCIONES GLOBALES
+
+// 6. ACCIONES GLOBALES
 document.getElementById('btnMarcarTodas').addEventListener('click', () => {
   tareas.forEach(t => t.completado = true);
   renderizarTareas();
@@ -314,3 +314,6 @@ document.getElementById('btnVaciar').addEventListener('click', () => {
     renderizarTareas();
   }
 });
+
+
+renderizarTareas();
