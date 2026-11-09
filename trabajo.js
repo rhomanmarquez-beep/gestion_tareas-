@@ -1,5 +1,100 @@
+class TareaItem extends HTMLElement {
+  constructor() {
+    super();
+    this.attachShadow({ mode: 'open' });
+  }
+
+  connectedCallback() {
+    this.render();
+  }
+
+  render() {
+    const id = this.getAttribute('data-id');
+    const titulo = this.getAttribute('data-titulo');
+    const fecha = this.getAttribute('data-fecha') || new Date().toLocaleDateString();
+    const completado = this.getAttribute('data-completado') === 'true';
+    const esImportada = this.getAttribute('data-importada') === 'true';
+
+    this.shadowRoot.innerHTML = `
+      <style>
+        :host {
+          display: block;
+          margin-bottom: 8px;
+        }
+        .tarea-item {
+          display: flex;
+          justify-content: space-between;
+          align-items: center;
+          padding: 10px 15px;
+          border-radius: 6px;
+          background-color: #f9f9f9;
+          border: 1px solid #ddd;
+        }
+        .tarea-item.completada span.titulo {
+          text-decoration: line-through;
+          color: #888;
+        }
+        .badge {
+          background-color: #007bff;
+          color: white;
+          font-size: 0.75rem;
+          padding: 2px 6px;
+          border-radius: 4px;
+          margin-left: 5px;
+        }
+        .fecha {
+          font-size: 0.8rem;
+          color: #666;
+          margin-left: 8px;
+        }
+        .btn {
+          cursor: pointer;
+          border: none;
+          padding: 5px 10px;
+          border-radius: 4px;
+          font-size: 0.9rem;
+        }
+        .secundario { background-color: #e0e0e0; }
+        .peligro { background-color: #ff4d4d; color: white; }
+      </style>
+      
+      <div class="tarea-item ${completado ? 'completada' : ''}">
+        <div>
+          <input type="checkbox" class="chk-estado" ${completado ? 'checked' : ''}>
+          <span class="titulo">${titulo}</span>
+          <span class="fecha">(${fecha})</span>
+          ${esImportada ? '<span class="badge">Importada</span>' : ''}
+        </div>
+        <div>
+          ${!esImportada ? `<button class="btn secundario btn-editar">✏️</button>` : ''}
+          <button class="btn peligro btn-eliminar">🗑️</button>
+        </div>
+      </div>
+    `;
+
+    this.shadowRoot.querySelector('.chk-estado').addEventListener('change', () => {
+      cambiarEstado(id);
+    });
+
+    const btnEditar = this.shadowRoot.querySelector('.btn-editar');
+    if (btnEditar) {
+      btnEditar.addEventListener('click', () => prepararEdicion(id));
+    }
+
+    this.shadowRoot.querySelector('.btn-eliminar').addEventListener('click', () => {
+      eliminarTarea(id);
+    });
+  }
+}
+
+customElements.define('tarea-item', TareaItem);
+
+
+
+
 // 1. ESTADO: Cargar tareas guardadas o iniciar con un arreglo vacío
 let tareas = JSON.parse(localStorage.getItem('MIS_TAREAS')) || [];
+let tareasApiGlobal = [];
 // 2. ELEMENTOS DEL DOM
 const listaTareas = document.getElementById('listaTareas');
 const mensajeVacio = document.getElementById('mensajeVacio');
@@ -16,33 +111,39 @@ const filtroEstado = document.getElementById('filtroEstado');
 function renderizarTareas() {
   listaTareas.innerHTML = '';
 
-  if (tareas.length === 0) {
+   const textoBuscador = buscador.value.toLowerCase();
+  const estadoFiltro = filtroEstado.value;
+
+  const tareasFiltradas = tareas.filter(t => {
+    const coincideTexto = t.titulo.toLowerCase().includes(textoBuscador);
+    const coincideEstado = 
+      estadoFiltro === 'todas' ? true :
+      estadoFiltro === 'completadas' ? t.completado :
+      !t.completado;
+    return coincideTexto && coincideEstado;
+  });
+
+  if (tareasFiltradas.length === 0) {
     mensajeVacio.style.display = 'block';
   } else {
     mensajeVacio.style.display = 'none';
   }
 
-  tareas.forEach(tarea => {
-    const li = document.createElement('li');
-    li.className = `tarea-item ${tarea.completado ? 'completada' : ''}`;
-    
-    li.innerHTML = `
-      <div>
-        <input type="checkbox" ${tarea.completado ? 'checked' : ''} onclick="cambiarEstado('${tarea.id}')">
-        <span>${tarea.titulo}</span>
-        ${tarea.esImportada ? '<span class="badge">Importada</span>' : ''}
-      </div>
-      <div>
-        ${!tarea.esImportada ? `<button class="btn secundario" onclick="prepararEdicion('${tarea.id}')">editar</button>` : ''}
-        <button class="btn peligro" onclick="eliminarTarea('${tarea.id}')">eliminar</button>
-      </div>
-    `;
-    listaTareas.appendChild(li);
+  tareasFiltradas.forEach(tarea => {
+    const item = document.createElement('tarea-item');
+    item.setAttribute('data-id', tarea.id);
+    item.setAttribute('data-titulo', tarea.titulo);
+    item.setAttribute('data-fecha', tarea.fecha || new Date().toLocaleDateString());
+    item.setAttribute('data-completado', tarea.completado);
+    item.setAttribute('data-importada', tarea.esImportada || false);
+
+    listaTareas.appendChild(item);
   });
 
-  // Guardar cambios en el navegador
   localStorage.setItem('MIS_TAREAS', JSON.stringify(tareas));
 }
+
+
 
 renderizarTareas();
 
@@ -107,6 +208,9 @@ function cerrarModal() {
 }
 
 document.getElementById('btnCerrarModal').addEventListener('click', cerrarModal);
+
+buscador.addEventListener('input', renderizarTareas);
+filtroEstado.addEventListener('change', renderizarTareas);
 
 // Actualizamos la función de renderizado para soportar filtros y búsqueda
 function renderizarTareas() {
