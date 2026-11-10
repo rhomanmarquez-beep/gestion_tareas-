@@ -1,4 +1,4 @@
-#  Gestor de Tareas Web App (`ProyectoTareas_JavaScript_ApellidoNombre`)
+#  Gestor de Tareas Web App (`gestion_tareas-`)
 
 ¡Bienvenido al **Gestor de Tareas**! Esta es una aplicación web interactiva, moderna y *responsive* diseñada para administrar tareas personales e importar datos remotos mediante el consumo de una API REST pública. La aplicación hace uso del stack nativo de tecnologías web (**HTML5, CSS3, JavaScript ES6+**) e incorpora conceptos avanzados de desarrollo frontend como **Web Components** encapsulados con **Shadow DOM** y almacenamiento persistente local.
 
@@ -43,7 +43,7 @@ La arquitectura visual de la aplicación se estructuró a partir de wireframes c
 El repositorio está organizado con la siguiente estructura de archivos:
 
 ```text
-ProyectoTareas_JavaScript_ApellidoNombre/
+gestion_tareas
 │
 ├── inicio-pagina.html   # Landpage inicial de presentación del servicio
 ├── registro.html        # Pantalla de registro de usuario
