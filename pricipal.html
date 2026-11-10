@@ -36,8 +36,13 @@
       <h2 id="tituloModal">Nueva Tarea</h2>
       <form id="formTarea">
         <input type="hidden" id="tareaId">
-        <label>Título / Descripción:</label>
+        
+        <label for="inputTitulo">Título:</label>
         <input type="text" id="inputTitulo" required placeholder="Ej. Estudiar JavaScript">
+        
+        <!-- Nuevo campo de Descripción -->
+        <label for="inputDescripcion">Descripción:</label>
+        <textarea id="inputDescripcion" rows="3" placeholder="Ej. Repasar promesas, async/await y fetch"></textarea>
         
         <div class="modal-acciones">
           <button type="button" id="btnCerrarModal" class="btn secundario">Cancelar</button>
